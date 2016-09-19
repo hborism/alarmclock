@@ -17,9 +17,7 @@ public class Time extends Thread{
 			if (diff > 0)
 				try {
 					sleep(diff);
-					sharedData.s.take();
 					sharedData.tick();
-					sharedData.s.give();
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

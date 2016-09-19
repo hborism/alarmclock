@@ -5,31 +5,33 @@ import se.lth.cs.realtime.semaphore.MutexSem;
 
 public class SharedData {
 	
-	public Semaphore s;
+	private Semaphore s;
 	
 	private int theTime;
 	private int alarmTime;
 	private boolean alarmOn;
 	private int soundAlarmTimeLeft;
+	private int previous;
 	
 	private static ClockOutput	output;
-	private static ClockInput 	input;
 	
 	//gör en mutex här som löser när flera vill komma in och ändra i shareddata
 	
-	public SharedData(ClockOutput o, ClockInput i){		
+	public SharedData(ClockOutput o){		
 		output = o;
-		input = i;
 		
 		theTime = 0;
 		alarmTime = 0;
-		alarmOn = i.getAlarmFlag();
+		alarmOn = false;
 		soundAlarmTimeLeft = 0;
+		previous = 0;
 		
 		s = new MutexSem();
 	}
 	
 	public void tick() {
+		//take mutex
+		s.take();
 		int seconds = theTime % 100;
 		int minutes = (theTime/100) % 100;
 		int hours = (theTime/10000);
@@ -49,6 +51,7 @@ public class SharedData {
 			hours =0;
 		}
 		theTime = seconds + 100*minutes + 10000*hours;
+
 		
 		output.showTime(theTime);
 		
@@ -60,35 +63,39 @@ public class SharedData {
 			soundAlarmTimeLeft--;
 			output.doAlarm();
 		}
-		
-		
+
+		s.give(); //give mutex
 	}
 	
 	public void setAlarmTime(int value) {
+		s.take();
 		alarmTime = value;
+		s.give();
 	}
 	
 	public void setTheTime(int value) {
+		s.take();
 		theTime = value;
+		s.give();
 	}
 	
 	public void setAlarmOn(boolean value) {
+		s.take();
 		alarmOn = value;
+		s.give();
 	}
 	
 	public void turnOffSoundAlarm() {
+		s.take();
 		soundAlarmTimeLeft =0;
+		s.give();
 	}
 	
 	public ClockOutput output() {
 		return output;
 	}
 	
-	public ClockInput input() {
-		return input;
-	}
-	
-	public boolean getAlarmOn() {
+	private boolean getAlarmOn() {
 		return alarmOn;
 	}
 	

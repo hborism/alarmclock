@@ -26,13 +26,13 @@ public class AlarmClock extends Thread {
 	// each keypress. To be modified in the lab.
 	public void run() {
 		
-		SharedData sd = new SharedData(output, input);
+		SharedData sd = new SharedData(output);
 			
 		Thread t, k;
 		t= new Time(sd);
 		t.start();
 		
-		k= new Keys(sd);
+		k= new Keys(sd, input);
 		k.start();
 		
 //		while (true) {
